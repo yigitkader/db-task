@@ -13,6 +13,7 @@ data class FactClientResponse(
 )
 
 data class FactResponse(
+    val factId: String,
     val text: String,
     val source: String,
     val sourceUrl: String,

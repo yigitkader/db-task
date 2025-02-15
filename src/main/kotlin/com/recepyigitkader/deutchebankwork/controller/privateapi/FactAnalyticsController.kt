@@ -1,18 +1,18 @@
 package com.recepyigitkader.deutchebankwork.controller.privateapi
 
 import com.recepyigitkader.deutchebankwork.dto.AnalyticsResponse
-import com.recepyigitkader.deutchebankwork.service.AnalyticsService
+import com.recepyigitkader.deutchebankwork.service.StatisticService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController()
-@RequestMapping("/v1/admin/analytics")
+@RequestMapping("/v1/admin/statistics")
 class FactAnalyticsController(
-    private val analyticsService: AnalyticsService
+    private val statisticService: StatisticService
 ) {
     @GetMapping()
     fun getAnalytics(): List<AnalyticsResponse> {
-        return analyticsService.getAllAnalytics()
+        return statisticService.getAllAnalytics()
     }
 }

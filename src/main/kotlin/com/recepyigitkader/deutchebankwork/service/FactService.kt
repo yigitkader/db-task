@@ -7,6 +7,7 @@ import com.recepyigitkader.deutchebankwork.exceptions.ExternalCallException
 import com.recepyigitkader.deutchebankwork.exceptions.UnexpectedException
 import com.recepyigitkader.deutchebankwork.model.Fact
 import com.recepyigitkader.deutchebankwork.repository.FactRepository
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,10 +17,13 @@ import org.springframework.web.reactive.function.client.WebClient
 class FactService(
     private val webClient: WebClient,
     private val factsConfig: FactsConfig,
-    private val analyticsService: AnalyticsService,
+    private val statisticService: StatisticService,
     private val factRepository: FactRepository,
-    private val urlShortenerService: UrlShortenerService
+    private val urlShortenerService: UrlShortenerService,
+    private val timeService: TimeService,
 ) {
+
+    private val logger = LoggerFactory.getLogger(FactService::class.java)
 
     @Transactional
     fun fetchFact(): FactResponse {
@@ -34,16 +38,20 @@ class FactService(
 
         try {
             val fact = Fact(
+                factId = externalFact.id,
                 text = externalFact.text,
                 source = externalFact.source,
                 sourceUrl = externalFact.sourceUrl,
                 language = externalFact.language,
                 permalink = externalFact.permalink,
-                shortenedUrl = shortUrl
+                shortenedUrl = shortUrl,
+                createdDate = timeService.getLocalDateTime(),
             )
 
             val saved = factRepository.save(fact)
-            analyticsService.addStatistic(fact = fact)
+            logger.info("New fact: $saved")
+            val statistic = statisticService.addStatistic(fact = fact)
+            logger.info("New statistic added: $statistic")
 
             return saved.toResponse()
 
@@ -73,7 +81,14 @@ class FactService(
         return factRepository.findByShortenedUrl(shortenedUrl)?.toResponse()
     }
 
+    @Cacheable(cacheNames = ["facts_all"])
+    fun getFacts(): List<FactResponse> {
+        return factRepository.findAll().map { it.toResponse() }
+    }
+
+
     private fun Fact.toResponse() = FactResponse(
+        factId = factId,
         text = text,
         source = source,
         sourceUrl = sourceUrl,
@@ -82,10 +97,4 @@ class FactService(
         shortenedUrl = shortenedUrl,
         createdDate = createdDate
     )
-
-    @Cacheable(cacheNames = ["facts_all"])
-    fun getFacts(): List<FactResponse> {
-        return factRepository.findAll().map { it.toResponse() }
-    }
-
 }

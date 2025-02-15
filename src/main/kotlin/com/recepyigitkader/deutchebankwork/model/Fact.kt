@@ -10,6 +10,9 @@ data class Fact(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
+    @Column(nullable = false, unique = true)
+    val factId: String,
+
     @Column(nullable = false)
     val text: String,
 
@@ -33,6 +36,7 @@ data class Fact(
 ) {
     constructor() : this(
         id = null,
+        factId = "",
         text = "",
         source = "",
         sourceUrl = "",

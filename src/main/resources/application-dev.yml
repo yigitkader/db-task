@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: deutche-bank-app
+  datasource:
+    url: jdbc:h2:mem:factsdb
+    username: sa
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+fact:
+  api: "https://uselessfacts.jsph.pl/random.json?language=en"
+  secrets:
+    - "admin-secret-1"
+    - "admin-secret-2"
+
