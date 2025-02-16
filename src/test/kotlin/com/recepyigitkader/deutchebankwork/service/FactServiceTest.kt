@@ -3,11 +3,13 @@ package com.recepyigitkader.deutchebankwork.service
 import com.recepyigitkader.deutchebankwork.config.FactsConfig
 import com.recepyigitkader.deutchebankwork.dto.FactClientResponse
 import com.recepyigitkader.deutchebankwork.dto.FactResponse
+import com.recepyigitkader.deutchebankwork.exceptions.ExternalCallException
 import com.recepyigitkader.deutchebankwork.model.Fact
 import com.recepyigitkader.deutchebankwork.model.FactStatistic
 import com.recepyigitkader.deutchebankwork.repository.FactRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
@@ -104,6 +106,20 @@ class FactServiceTest {
         verify(urlShortenerService).generateShortUrl()
         verify(factRepository).save(FACT)
         verify(statisticService).addStatistic(SAVED_FACT)
+    }
+
+
+    @Test
+    fun `should not fetch and save new fact when external call failed`() {
+        // given
+        setupWebClientErrorMock()
+
+        // then
+        assertThrows<ExternalCallException> { factService.fetchFact() }
+        verifyNoInteractions(factRepository)
+        verifyNoInteractions(urlShortenerService)
+        verifyNoInteractions(factRepository)
+        verifyNoInteractions(statisticService)
     }
 
     @Test
@@ -229,6 +245,6 @@ class FactServiceTest {
         `when`(requestHeadersUriSpec.uri("test-url")).thenReturn(requestHeadersSpec)
         `when`(requestHeadersSpec.retrieve()).thenReturn(responseSpec)
         `when`(responseSpec.bodyToMono(FactClientResponse::class.java))
-            .thenReturn(Mono.error(RuntimeException("API Error")))
+            .thenReturn(Mono.error(ExternalCallException("API Error")))
     }
 }

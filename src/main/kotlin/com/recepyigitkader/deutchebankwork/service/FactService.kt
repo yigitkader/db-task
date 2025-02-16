@@ -8,6 +8,7 @@ import com.recepyigitkader.deutchebankwork.exceptions.UnexpectedException
 import com.recepyigitkader.deutchebankwork.model.Fact
 import com.recepyigitkader.deutchebankwork.repository.FactRepository
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,7 @@ class FactService(
 
     private val logger = LoggerFactory.getLogger(FactService::class.java)
 
+    @CacheEvict(cacheNames = ["facts_all"], allEntries = true)
     @Transactional
     fun fetchFact(): ResponseEntity<Any> {
         val externalFact = callExternalAPI()
