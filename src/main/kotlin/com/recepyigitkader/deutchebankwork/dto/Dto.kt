@@ -1,33 +1,41 @@
 package com.recepyigitkader.deutchebankwork.dto
 
-import com.recepyigitkader.deutchebankwork.model.Fact
+import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDateTime
 
 data class FactClientResponse(
+    @JsonProperty("id")
     val id: String,
+
+    @JsonProperty("text")
     val text: String,
+
+    @JsonProperty("source")
     val source: String,
+
+    @JsonProperty("source_url")
     val sourceUrl: String,
+
+    @JsonProperty("language")
     val language: String,
+
+    @JsonProperty("permalink")
     val permalink: String
+) {
+    constructor() : this("", "", "", "", "", "") // necessary for ObjectMapper
+}
+
+data class AnalyticsResponse(
+    val fact: FactResponse,
+    val firstAccessedAt: LocalDateTime,
+    val lastAccessedAt: LocalDateTime,
+    val accessCount: Long
 )
 
 data class FactResponse(
-    val factId: String,
-    val text: String,
-    val source: String,
-    val sourceUrl: String,
-    val language: String,
-    val permalink: String,
+    val originalFact: String,
     val shortenedUrl: String,
-    val createdDate: LocalDateTime,
 )
-
-data class AnalyticsResponse(
-    val fact: Fact,
-    val accessedAt: LocalDateTime
-)
-
 
 data class CacheStats(
     val cacheName: String,

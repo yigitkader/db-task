@@ -17,7 +17,7 @@ spring:
       settings:
         web-allow-others: false
 
-fact:
+facts:
   api: "https://uselessfacts.jsph.pl/random.json?language=en"
   secrets:
     - "admin-secret-1"

@@ -1,5 +1,6 @@
-package com.recepyigitkader.deutchebankwork.config
+package com.recepyigitkader.deutchebankwork.security
 
+import com.recepyigitkader.deutchebankwork.config.FactsConfig
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

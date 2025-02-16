@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
 interface FactRepository : JpaRepository<Fact, Long> {
     fun existsFactByShortenedUrl(shortenedUrl: String): Boolean
     fun findByShortenedUrl(shortenedUrl: String): Fact?
-    fun findByPermalink(permalink: String): Fact?
+    fun findByOriginalFact(originalFact: String): Fact?
 }

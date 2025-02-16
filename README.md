@@ -3,17 +3,17 @@
 A Spring Boot application for managing and retrieving facts with URL shortening capabilities.
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
-  - [Local Development](#local-development)
-  - [Docker Deployment](#docker-deployment)
-  - [Environment Variables](#environment-variables)
+    - [Local Development](#local-development)
+    - [Docker Deployment](#docker-deployment)
+    - [Environment Variables](#environment-variables)
 - [API Documentation](#api-documentation)
-  - [Public APIs](#public-apis)
-  - [Admin APIs](#admin-apis)
+    - [Public APIs](#public-apis)
+    - [Admin APIs](#admin-apis)
 - [Development](#development)
-- [Contributing](#contributing)
 
 ## Prerequisites
 
@@ -29,8 +29,20 @@ A Spring Boot application for managing and retrieving facts with URL shortening 
 - Gradle
 - Docker
 - Make (for build automation)
+- H2 DB
 
 ## Getting Started
+
+### About Database
+
+- We use in memory H2 database. database will work when you run app
+- ```Address: localhost:8080/h2-console```
+
+Simply run app:
+
+```bash
+make local-run
+```
 
 ### Local Development
 
@@ -82,6 +94,7 @@ SERVER_PORT   # Server port (default: 8080)
 ```
 
 Example usage with environment variables:
+
 ```bash
 ENV=prod SERVER_PORT=9000 make local-run
 # or
@@ -94,15 +107,33 @@ ENV=prod SERVER_PORT=9000 make docker-run
 
 #### Facts Management
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/v1/facts` | Create new fact with shortened URL |
-| GET | `/v1/facts/{shortenedUrl}` | Retrieve fact by shortened URL |
-| GET | `/v1/facts/` | List all facts |
+| Method | Endpoint                            | Description                                                                               |
+|--------|-------------------------------------|-------------------------------------------------------------------------------------------|
+| POST   | `/v1/facts`                         | Fetches a random fact from the Useless Facts API, stores it, and returns a shortened URL. |
+| GET    | `/v1/facts/{shortenedUrl}`          | Returns the cached fact and increments the access count.                                  |
+| GET    | `/v1/facts/{shortenedUrl}/redirect` | Redirects to the original fact and increments the access count.                           |
+| GET    | `/v1/facts/`                        | Returns all cached facts and does not increment the access count.                         |
 
-Example request for creating a fact:
+Example requests:
+
+1. Create new fact:
+
 ```bash
-curl -X POST http://localhost:8080/v1/facts \
+curl -X POST http://localhost:8080/facts \
+  -H "Content-Type: application/json"
+```
+
+2. Get fact by shortened URL:
+
+```bash
+curl -X GET http://localhost:8080/facts/ABC123 \
+  -H "Content-Type: application/json"
+```
+
+3. Get all facts:
+
+```bash
+curl -X GET http://localhost:8080/facts \
   -H "Content-Type: application/json"
 ```
 
@@ -113,20 +144,33 @@ Admin APIs require authentication using the `X-Client-Secret` header.
 #### Authentication
 
 Add the following header to all admin API requests:
+
 ```
 X-Client-Secret: admin-secret-1
 ```
 
 #### Available Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/v1/admin/statistics/cache` | Retrieve system cache statistics |
-| GET | `/v1/admin/statistics` | Get access statistics |
+| Method | Endpoint                  | Description                                        |
+|--------|---------------------------|----------------------------------------------------|
+| GET    | `/admin/statistics/cache` | Retrieve system cache statistics                   |
+| GET    | `/admin/statistics`       | Provides access statistics for all shortened URLs. |
 
-Example admin API request:
+Example requests:
+
+1. Get cache statistics:
+
 ```bash
-curl -X GET http://localhost:8080/v1/admin/statistics \
+curl -X GET http://localhost:8080/admin/statistics/cache \
+  -H "Content-Type: application/json" \
+  -H "X-Client-Secret: admin-secret-1"
+```
+
+2. Get access statistics:
+
+```bash
+curl -X GET http://localhost:8080/admin/statistics \
+  -H "Content-Type: application/json" \
   -H "X-Client-Secret: admin-secret-1"
 ```
 
@@ -135,14 +179,7 @@ curl -X GET http://localhost:8080/v1/admin/statistics \
 ### Running Tests
 
 To run all tests:
+
 ```bash
 make test
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request

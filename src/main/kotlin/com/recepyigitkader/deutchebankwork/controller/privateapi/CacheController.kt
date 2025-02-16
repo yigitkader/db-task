@@ -7,11 +7,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v1/admin/statistics/cache")
+@RequestMapping("/admin/statistics/cache")
 class CacheController(
     private val cacheService: CacheService
 ) {
-
     @GetMapping
     fun getCacheStats(): Map<String, CacheStats> {
         return cacheService.getCacheStats()

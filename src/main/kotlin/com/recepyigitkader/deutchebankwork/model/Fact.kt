@@ -1,7 +1,6 @@
 package com.recepyigitkader.deutchebankwork.model
 
 import jakarta.persistence.*
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "facts")
@@ -11,38 +10,13 @@ data class Fact(
     val id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    val factId: String,
-
-    @Column(nullable = false)
-    val text: String,
-
-    @Column(nullable = false)
-    val source: String,
-
-    @Column(nullable = false)
-    val sourceUrl: String,
-
-    @Column(nullable = false)
-    val language: String,
-
-    @Column(nullable = false, unique = true)
-    val permalink: String,
+    val originalFact: String,
 
     @Column(nullable = false, unique = true)
     val shortenedUrl: String,
-
-    @Column(nullable = false)
-    val createdDate: LocalDateTime = LocalDateTime.now()
 ) {
     constructor() : this(
-        id = null,
-        factId = "",
-        text = "",
-        source = "",
-        sourceUrl = "",
-        language = "",
-        permalink = "",
+        originalFact = "",
         shortenedUrl = "",
-        createdDate = LocalDateTime.now()
     )
 }

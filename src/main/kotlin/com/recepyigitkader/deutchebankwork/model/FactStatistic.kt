@@ -15,12 +15,19 @@ data class FactStatistic(
     val fact: Fact,
 
     @Column(nullable = false)
-    val accessedAt: LocalDateTime = LocalDateTime.now(),
+    val firstAccessedAt: LocalDateTime = LocalDateTime.now(),
 
+    @Column(nullable = false)
+    val lastAccessedAt: LocalDateTime = LocalDateTime.now(),
+
+    @Column(nullable = false)
+    val accessCount: Long
 ) {
     constructor() : this(
         id = null,
         fact = Fact(),
-        accessedAt = LocalDateTime.now(),
+        firstAccessedAt = LocalDateTime.now(),
+        lastAccessedAt = LocalDateTime.now(),
+        accessCount = 0
     )
 }
