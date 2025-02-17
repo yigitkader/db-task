@@ -24,17 +24,18 @@ class FactService(
     private val statisticService: StatisticService,
     private val factRepository: FactRepository,
     private val urlShortenerService: UrlShortenerService,
+    private val factCacheService: FactCacheService,
 ) {
 
     private val logger = LoggerFactory.getLogger(FactService::class.java)
 
-    @CacheEvict(cacheNames = ["facts_all"], allEntries = true)
+    @CacheEvict(cacheNames = ["facts", "facts_all"], allEntries = true)
     @Transactional
     fun fetchFact(): ResponseEntity<Any> {
         val externalFact = callExternalAPI()
             ?: throw ExternalCallException("Failed to fetch fact from external API")
 
-        factRepository.findByOriginalFact(externalFact.permalink)?.let {
+        factCacheService.getFactByOriginalFact(externalFact.permalink)?.let {
             statisticService.incrementAccessCountFactAnalytic(it)
             return ResponseEntity.ok(it.toResponse())
         }
@@ -48,7 +49,7 @@ class FactService(
             )
 
             val saved = factRepository.save(fact)
-            logger.info("New fact: $saved")
+            logger.info("New fact added: $saved")
 
             val statistic = statisticService.addStatistic(fact = saved)
             logger.info("New statistic added: $statistic")
@@ -77,14 +78,14 @@ class FactService(
         }
     }
 
-    @Cacheable(cacheNames = ["facts"], key = "#shortenedUrl")
     fun getFact(shortenedUrl: String): ResponseEntity<Any> {
-        return factRepository.findByShortenedUrl(shortenedUrl)?.let {
-            statisticService.incrementAccessCountFactAnalytic(it)
-            return ResponseEntity.ok(it.toResponse())
-        } ?: ResponseEntity
+        val fact = factCacheService.getFactByShortenedURL(shortenedUrl) ?: return ResponseEntity
             .status(HttpStatus.NOT_FOUND)
-            .body(mapOf("message" to "Fact not found with shortened URL: $shortenedUrl"))
+            .body(mapOf("message" to "Fact not found"))
+
+        statisticService.incrementAccessCountFactAnalytic(fact)
+
+        return ResponseEntity.ok(fact.toResponse())
     }
 
     @Cacheable(cacheNames = ["facts_all"])
@@ -92,9 +93,8 @@ class FactService(
         return ResponseEntity.ok(factRepository.findAll().map { it.toResponse() })
     }
 
-
     fun getFactRedirect(shortenedUrl: String): ResponseEntity<Any> {
-        return factRepository.findByShortenedUrl(shortenedUrl)?.let {
+        return factCacheService.getFactByShortenedURL(shortenedUrl)?.let {
             statisticService.incrementAccessCountFactAnalytic(it)
             ResponseEntity
                 .status(HttpStatus.FOUND)

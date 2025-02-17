@@ -27,7 +27,7 @@ class StatisticService(
         )
     }
 
-    @CacheEvict(cacheNames = ["analytics"])
+    @CacheEvict(cacheNames = ["facts", "facts_all", "analytics"], allEntries = true)
     fun incrementAccessCountFactAnalytic(fact: Fact) {
         factStatisticRepository.findByFact(fact)?.let {
             factStatisticRepository.save(

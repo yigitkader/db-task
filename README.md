@@ -130,7 +130,14 @@ curl -X GET http://localhost:8080/facts/ABC123 \
   -H "Content-Type: application/json"
 ```
 
-3. Get all facts:
+3. Get fact by shortened URL and redirect(try on browser):
+
+```bash
+curl -X GET http://localhost:8080/facts/ABC123/redirect \
+  -H "Content-Type: application/json"
+```
+
+4. Get all facts:
 
 ```bash
 curl -X GET http://localhost:8080/facts \

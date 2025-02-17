@@ -35,6 +35,9 @@ class FactServiceTest {
     private lateinit var statisticService: StatisticService
 
     @Mock
+    private lateinit var factCacheService: FactCacheService
+
+    @Mock
     private lateinit var factRepository: FactRepository
 
     @Mock
@@ -88,7 +91,7 @@ class FactServiceTest {
     fun `should fetch and save new fact`() {
         // given
         setupWebClientMock()
-        `when`(factRepository.findByOriginalFact(FACT_CLIENT_RESPONSE.permalink)).thenReturn(null)
+        `when`(factCacheService.getFactByOriginalFact(FACT_CLIENT_RESPONSE.permalink)).thenReturn(null)
         `when`(urlShortenerService.generateShortUrl()).thenReturn(SHORTENED_URL)
         `when`(factRepository.save(FACT)).thenReturn(SAVED_FACT)
         `when`(statisticService.addStatistic(SAVED_FACT)).thenReturn(FACT_STATISTIC)
@@ -102,7 +105,7 @@ class FactServiceTest {
         assertEquals(FACT_RESPONSE.originalFact, responseBody.originalFact)
         assertEquals(FACT_RESPONSE.shortenedUrl, responseBody.shortenedUrl)
 
-        verify(factRepository).findByOriginalFact(FACT_CLIENT_RESPONSE.permalink)
+        verify(factCacheService).getFactByOriginalFact(FACT_CLIENT_RESPONSE.permalink)
         verify(urlShortenerService).generateShortUrl()
         verify(factRepository).save(FACT)
         verify(statisticService).addStatistic(SAVED_FACT)
@@ -120,13 +123,14 @@ class FactServiceTest {
         verifyNoInteractions(urlShortenerService)
         verifyNoInteractions(factRepository)
         verifyNoInteractions(statisticService)
+        verifyNoInteractions(factCacheService)
     }
 
     @Test
     fun `should return existing fact and increment access count if already exists`() {
         // given
         setupWebClientMock()
-        `when`(factRepository.findByOriginalFact(FACT_CLIENT_RESPONSE.permalink)).thenReturn(FACT)
+        `when`(factCacheService.getFactByOriginalFact(FACT_CLIENT_RESPONSE.permalink)).thenReturn(FACT)
         doNothing().`when`(statisticService).incrementAccessCountFactAnalytic(FACT)
 
         // when
@@ -138,7 +142,7 @@ class FactServiceTest {
         assertEquals(FACT_RESPONSE.originalFact, responseBody.originalFact)
         assertEquals(FACT_RESPONSE.shortenedUrl, responseBody.shortenedUrl)
 
-        verify(factRepository).findByOriginalFact(FACT_CLIENT_RESPONSE.permalink)
+        verify(factCacheService).getFactByOriginalFact(FACT_CLIENT_RESPONSE.permalink)
         verify(statisticService).incrementAccessCountFactAnalytic(FACT)
         verify(urlShortenerService, never()).generateShortUrl()
         verify(factRepository, never()).save(FACT)
@@ -148,7 +152,7 @@ class FactServiceTest {
     @Test
     fun `should get fact by shortened url and increment access count`() {
         // given
-        `when`(factRepository.findByShortenedUrl("abc123")).thenReturn(FACT)
+        `when`(factCacheService.getFactByShortenedURL("abc123")).thenReturn(FACT)
         doNothing().`when`(statisticService).incrementAccessCountFactAnalytic(FACT)
 
         // when
@@ -159,14 +163,14 @@ class FactServiceTest {
         val responseBody = result.body as FactResponse
         assertEquals(FACT_RESPONSE.originalFact, responseBody.originalFact)
         assertEquals(FACT_RESPONSE.shortenedUrl, responseBody.shortenedUrl)
-        verify(factRepository).findByShortenedUrl("abc123")
+        verify(factCacheService).getFactByShortenedURL("abc123")
         verify(statisticService).incrementAccessCountFactAnalytic(FACT)
     }
 
     @Test
     fun `should return not found when fact not found by shortened url`() {
         // given
-        `when`(factRepository.findByShortenedUrl("notfound")).thenReturn(null)
+        `when`(factCacheService.getFactByShortenedURL("notfound")).thenReturn(null)
 
         // when
         val result = factService.getFact("notfound")
@@ -175,7 +179,7 @@ class FactServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
         val responseBody = result.body as Map<*, *>
         assertTrue(responseBody["message"].toString().contains("not found"))
-        verify(factRepository).findByShortenedUrl("notfound")
+        verify(factCacheService).getFactByShortenedURL("notfound")
         verify(statisticService, never()).incrementAccessCountFactAnalytic(FACT)
     }
 
@@ -201,7 +205,7 @@ class FactServiceTest {
     @Test
     fun `should handle redirect for existing fact`() {
         // given
-        `when`(factRepository.findByShortenedUrl("abc123")).thenReturn(FACT)
+        `when`(factCacheService.getFactByShortenedURL("abc123")).thenReturn(FACT)
         doNothing().`when`(statisticService).incrementAccessCountFactAnalytic(FACT)
 
         // when
@@ -210,14 +214,14 @@ class FactServiceTest {
         // then
         assertEquals(HttpStatus.FOUND, result.statusCode)
         assertEquals(URI.create(FACT.originalFact), result.headers.location)
-        verify(factRepository).findByShortenedUrl("abc123")
+        verify(factCacheService).getFactByShortenedURL("abc123")
         verify(statisticService).incrementAccessCountFactAnalytic(FACT)
     }
 
     @Test
     fun `should return not found for redirect when fact does not exist`() {
         // given
-        `when`(factRepository.findByShortenedUrl("notfound")).thenReturn(null)
+        `when`(factCacheService.getFactByShortenedURL("notfound")).thenReturn(null)
 
         // when
         val result = factService.getFactRedirect("notfound")
@@ -226,7 +230,7 @@ class FactServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, result.statusCode)
         val responseBody = result.body as Map<*, *>
         assertTrue(responseBody["message"].toString().contains("not found"))
-        verify(factRepository).findByShortenedUrl("notfound")
+        verify(factCacheService).getFactByShortenedURL("notfound")
         verify(statisticService, never()).incrementAccessCountFactAnalytic(FACT)
     }
 
