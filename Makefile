@@ -1,5 +1,3 @@
-# Spring Boot Kotlin Production Makefile
-
 # Project variables
 GRADLE := ./gradlew
 APP_NAME := deutche-bank-work
