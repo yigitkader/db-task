@@ -4,7 +4,7 @@ import com.recepyigitkader.deutchebankwork.config.FactsConfig
 import com.recepyigitkader.deutchebankwork.dto.FactClientResponse
 import com.recepyigitkader.deutchebankwork.dto.FactResponse
 import com.recepyigitkader.deutchebankwork.exceptions.ExternalCallException
-import com.recepyigitkader.deutchebankwork.exceptions.UnexpectedException
+import com.recepyigitkader.deutchebankwork.exceptions.UnableToUrlShorteningException
 import com.recepyigitkader.deutchebankwork.model.Fact
 import com.recepyigitkader.deutchebankwork.repository.FactRepository
 import org.slf4j.LoggerFactory
@@ -57,7 +57,7 @@ class FactService(
             return ResponseEntity.ok(saved.toResponse())
 
         } catch (e: Exception) {
-            throw UnexpectedException("Failed to save fact")
+            throw UnableToUrlShorteningException("Failed to save fact")
         }
     }
 

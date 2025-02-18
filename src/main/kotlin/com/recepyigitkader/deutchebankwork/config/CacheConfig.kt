@@ -28,7 +28,7 @@ class CacheConfig {
         return cacheManager
     }
 
-    @Scheduled(fixedRate = ONE_MINUTE)
+    @Scheduled(fixedRate = ONE_DAY)
     fun evictAllCaches() {
         cacheManager().cacheNames.forEach {
             cacheManager().getCache(it)?.clear()
@@ -38,7 +38,7 @@ class CacheConfig {
 
 
     companion object {
-        const val ONE_HOUR = 3600000L
+        const val ONE_DAY = 3600000 * 24L
         const val ONE_MINUTE = 60000L
     }
 
