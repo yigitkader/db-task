@@ -1,4 +1,4 @@
-# Deutsche Bank Work
+# DB Bank Work
 
 A Spring Boot application for managing and retrieving facts with URL shortening capabilities.
 
